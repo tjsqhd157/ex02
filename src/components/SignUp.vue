@@ -3,19 +3,26 @@
     <div class="icon">
       <img src="@/assets/images/checked.png" alt="Check Icon" />
     </div>
-    <h2 class="title">Sign in to DoitU</h2>
+    <h2 class="title">Sign up to DoitU</h2>
     <div class="login-container">
-      <form class="login-form">
+      <form class="login-form" @submit.prevent="signUp">
         <label for="id">ID</label>
-        <input type="text" id="id" name="id" placeholder="Enter your ID" />
+        <input
+          type="text"
+          id="id"
+          name="id"
+          v-model="formData.id"
+          placeholder="Enter your ID"
+        />
         <label for="password">Password</label>
         <input
           type="password"
           id="password"
           name="password"
+          v-model="formData.password"
           placeholder="Enter your password"
         />
-        <button type="submit" class="btn-login">Sign in</button>
+        <button type="submit" class="btn-login">Sign up</button>
       </form>
     </div>
   </div>
@@ -24,9 +31,21 @@
 <script>
 export default {
   name: "LoginFrame",
-  components: {},
+  methods: {
+    signUp() {
+      // You can add logic to handle the form submission, like validating the ID and password
+      console.log(this.formData); // You can log form data for now
+      this.$router.push("/success"); // Navigate to the success page
+    },
+  },
   data() {
-    return {};
+    return {
+      // Initialize the form data for id and password
+      formData: {
+        id: "",
+        password: "",
+      },
+    };
   },
 };
 </script>
@@ -40,11 +59,11 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #5cb784;
+  background-color: #25cd94;
 }
 
 .login-frame {
-  background-color: #31be86;
+  background-color: #25cd94;
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -108,6 +127,4 @@ body {
 .btn-login:hover {
   background-color: #146828;
 }
-
-
 </style>

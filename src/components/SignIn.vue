@@ -49,11 +49,11 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #5cb784;
+  background-color: #25cd94;
 }
 
 .login-frame {
-  background-color: #31be86;
+  background-color: #25cd94;
   align-items: center;
   justify-content: center;
   text-align: center;

@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import SignIn from '../components/SiginIn.vue';
-import SignUp from '../components/SiginUp.vue';
+import SignIn from '../components/SignIn.vue';
+import SignUp from '../components/SignUp.vue';
 import Main from '../components/Main.vue';
 import CalendarContainer from '../components/CalendarContainer.vue';
+import Success from '../components/Success.vue';
 
 const routes = [
+  
   {
     path: '/',
     name: 'SignIn',
@@ -19,6 +21,11 @@ const routes = [
     path: '/main',
     name: 'Main',
     component: Main,
+  },
+  {
+    path:'/success',
+    name: 'Success',
+    component: Success,
   },
   {
     path: '/calendar',
