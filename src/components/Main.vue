@@ -2,7 +2,7 @@
 <div>
   <div class="Container">
     <div class="logo">
-      <span><img src="./assets/images/checked_green.png" /></span> DoitU
+      <span><img src="src/assets/images/checked_green.png" /></span> DoitU
     </div>
     <div class="navigation">
       <button class="calendar-btn">Calendar</button>
@@ -23,7 +23,6 @@
 </template>
 
 <script>
-
 export default {};
 </script>
 
