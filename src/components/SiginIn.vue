@@ -1,11 +1,11 @@
 <template>
   <div class="login-frame">
     <div class="icon">
-      <img src="./assets/images/checked.png" alt="Check Icon" />
+      <img src="@/assets/images/checked.png" alt="Check Icon" />
     </div>
     <h2 class="title">Sign in to DoitU</h2>
     <div class="login-container">
-      <form class="login-form">
+      <form class="login-form" @submit.prevent="signIn">
         <label for="id">ID</label>
         <input type="text" id="id" name="id" placeholder="Enter your ID" />
         <label for="password">Password</label>
@@ -19,7 +19,7 @@
       </form>
     </div>
     <div class="signup">
-      <a href="#" class="create-account">Create an account</a>
+      <a href="#" class="create-account" @click.prevent="goToSignUp">Create an account</a>
     </div>
   </div>
 </template>
@@ -27,14 +27,20 @@
 <script>
 export default {
   name: "LoginFrame",
-  components: {},
-  data() {
-    return {};
+  methods: {
+    goToSignUp() {
+      this.$router.push("/signup"); // '/signup' 경로로 이동
+    },
+    signIn() {
+      // 로그인 성공 로직 추가 가능 (예: 사용자 인증)
+      this.$router.push("/main"); // '/main' 경로로 이동
+    },
   },
 };
 </script>
 
 <style>
+/* 기존 스타일 유지 */
 body {
   margin: 0;
   padding: 0;
@@ -65,6 +71,7 @@ body {
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
+
 .signup {
   width: 300px;
   padding: 20px;
@@ -73,6 +80,7 @@ body {
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
+
 .icon img {
   width: 40px;
   height: 40px;

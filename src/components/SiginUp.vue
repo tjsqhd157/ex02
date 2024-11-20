@@ -1,7 +1,7 @@
 <template>
   <div class="login-frame">
     <div class="icon">
-      <img src="./assets/images/checked.png" alt="Check Icon" />
+      <img src="@/assets/images/checked.png" alt="Check Icon" />
     </div>
     <h2 class="title">Sign in to DoitU</h2>
     <div class="login-container">
