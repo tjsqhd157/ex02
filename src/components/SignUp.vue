@@ -11,7 +11,7 @@
           type="text"
           id="id"
           name="id"
-          v-model="formData.id"
+          v-model="formData.userid"
           placeholder="Enter your ID"
         />
         <label for="password">Password</label>
@@ -32,21 +32,42 @@
 export default {
   name: "LoginFrame",
   methods: {
-    signUp() {
-      // You can add logic to handle the form submission, like validating the ID and password
-      console.log(this.formData); // You can log form data for now
-      this.$router.push("/success"); // Navigate to the success page
-    },
-  },
-  data() {
+    data() {
     return {
       // Initialize the form data for id and password
       formData: {
-        id: "",
+        userid: "",
         password: "",
       },
     };
   },
+    signUp() {
+      // You can add logic to handle the form submission, like validating the ID and password
+
+      //  axios
+      //   .post("/signup", {
+      //     userid: this.formData.id,
+      //     password: this.formData.password,
+      //
+      //   })
+      //   .then((response) => {
+      //     if (response.data.statusCode === 200) {
+      //       alert("회원가입 완료");
+      //       this.$router.push("/success");
+      //     } else {
+      //       alert("회원가입 실패: " + response.data.statusCode);
+      //     }
+      //   })
+      //   .catch((error) => {
+      //     alert("회원가입 실패: " + error.message);
+      //   });
+      // 위는 api 구현 전 로그인 성공 로직 추가 코드 (사용자 인증)
+      // axios 요청을 위해서는 1. axios를 import 해줘야함. 2.data() 안에 보낼 데이터가 존재해야함.
+      console.log(this.formData); // You can log form data for now
+      this.$router.push("/success"); // 위 로그인 성공 시 라우터로 페이지 바꿔주는거 넣어놨음. 나중에 백하고 연동하면 이 줄은 삭제해도됨.
+    },
+  },
+  
 };
 </script>
 
