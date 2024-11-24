@@ -1,29 +1,34 @@
 <template>
-<div>
-  <div class="Container">
-    <div class="logo">
-      <span><img src="src/assets/images/checked_green.png" /></span> DoitU
-    </div>
-    <div class="navigation">
-      <button class="calendar-btn">Calendar</button>
-      <div class="status-filters">
-        <button class="status all">All</button>
-        <button class="status working">
-          🔥 Working..! <span class="count">2</span>
-        </button>
-        <button class="status done">
-          🌈 Done..! <span class="count">0</span>
-        </button>
+  <div>
+    <div class="Container">
+      <div class="logo">
+        <span><img src="/assets/images/checked_green.png" /></span> DoitU
+      </div>
+      <div class="navigation">
+        <!-- Calendar 버튼 클릭 시 경로 변경 -->
+        <button class="calendar-btn" @click="goToCalendar">Calendar</button>
+        <div class="status-filters">
+          <button class="status all">All</button>
+          <button class="status working">
+            🔥 Working..! <span class="count">2</span>
+          </button>
+          <button class="status done">
+            🌈 Done..! <span class="count">0</span>
+          </button>
+        </div>
       </div>
     </div>
-    
   </div>
-
-</div>
 </template>
 
 <script>
-export default {};
+export default {
+  methods: {
+    goToCalendar() {
+      this.$router.push("/calendar"); // '/calendar' 경로로 이동
+    },
+  },
+};
 </script>
 
 <style>
