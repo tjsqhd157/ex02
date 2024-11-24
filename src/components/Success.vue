@@ -13,7 +13,7 @@
         </p>
       </div>
 
-      <div class="component">
+      <div class="component" @click="goToMain">
         <div class="text">Use it now</div>
       </div>
     </div>
@@ -23,6 +23,9 @@
 <script>
 export default {
   name: "MyScreen",
+  methods:{
+    goToMain(){this.$router.push("/maincontainer");}
+  },
   components: {},
 };
 </script>
@@ -34,7 +37,7 @@ body {
 }
 
 .screen {
-  background-color: #31be86;
+  background-color: #25cd94;
   align-items: center;
   height: 100vh;
   justify-content: center;

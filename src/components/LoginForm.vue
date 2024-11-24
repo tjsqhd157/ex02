@@ -1,3 +1,5 @@
+// 요 페이지는 없애도됩니다.
+
 <template>
   <div class="background-border">
     <div class="form">
