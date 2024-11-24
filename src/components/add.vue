@@ -17,9 +17,9 @@
       <label class="label">routine</label>
       <div class="routine-container">
         <button
-          v-for="(day) in days"
+          v-for="day in days"
           :key="day"
-          :class="['routine-button', { 'active': selectedDays.includes(day) }]"
+          :class="['routine-button', { active: selectedDays.includes(day) }]"
           @click="toggleDay(day)"
         >
           {{ day }}
@@ -32,11 +32,11 @@
       <label class="label">tag</label>
       <div class="tags">
         <button
-          v-for="(color) in colors"
+          v-for="color in colors"
           :key="color"
           :style="{ backgroundColor: color }"
           class="tag-button"
-          :class="{'active': selectedTag === color}"
+          :class="{ active: selectedTag === color }"
           @click="selectTag(color)"
         ></button>
       </div>
@@ -62,7 +62,7 @@ export default {
     toggleDay(day) {
       if (this.selectedDays.includes(day)) {
         // 이미 선택된 요일이라면 삭제
-        this.selectedDays = this.selectedDays.filter(d => d !== day);
+        this.selectedDays = this.selectedDays.filter((d) => d !== day);
       } else {
         // 선택되지 않은 요일이라면 추가
         this.selectedDays.push(day);
@@ -183,6 +183,4 @@ export default {
 .add-button:hover {
   background-color: #008a65;
 }
-
-
 </style>

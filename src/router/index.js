@@ -4,6 +4,7 @@ import SignUp from '../components/SignUp.vue';
 import Main from '../components/Main.vue';
 import CalendarContainer from '../components/CalendarContainer.vue';
 import Success from '../components/Success.vue';
+import MainContainer from '../components/MainContainer.vue';
 
 const routes = [
   
@@ -31,6 +32,11 @@ const routes = [
     path: '/calendar',
     name: 'Calendar',
     component: CalendarContainer,
+  },
+  {
+    path: '/maincontainer',
+    name: 'maincontainer',
+    component: MainContainer,
   },
 ];
 

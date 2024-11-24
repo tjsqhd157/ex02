@@ -24,7 +24,7 @@
 export default {
   name: "MyScreen",
   methods:{
-    goToMain(){this.$router.push("/main");}
+    goToMain(){this.$router.push("/maincontainer");}
   },
   components: {},
 };
