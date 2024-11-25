@@ -2,7 +2,7 @@
   <div class="sidebar">
     <!-- Title Input -->
     <div class="title-container">
-      <label for="title" class="title label">제목</label>
+      <label for="title" class="label">제목</label>
       <input
         id="title"
         v-model="newTask.title"
@@ -14,7 +14,7 @@
 
     <!-- Content Input -->
     <div class="content-container">
-      <label for="content" class="label">content</label>
+      <label for="content" class="label">내용</label>
       <textarea
         id="content"
         v-model="newTask.content"
@@ -25,7 +25,7 @@
 
     <!-- Routine Selector -->
     <div>
-      <label class="label">routine</label>
+      <label class="label">루틴</label>
       <div class="routine-container">
         <button
           v-for="(day, i) in days"
@@ -40,7 +40,7 @@
 
     <!-- Tag Selector -->
     <div>
-      <label class="label">tag</label>
+      <label class="label">태그</label>
       <div class="tags">
         <button
           v-for="(tag, i) in tagColors"
@@ -111,7 +111,6 @@ export default {
 
 .title-container{
   height: 20%;
-
 }
 .content-container{
   height: 30%;
@@ -125,7 +124,6 @@ export default {
   background-color: #f9f9f9;
   margin: 10px 5px;
   resize: none;
-  
 }
 .textarea {
   width: 90%;

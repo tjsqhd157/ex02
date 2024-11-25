@@ -65,7 +65,7 @@ export default {
       this.distributeTasks();
     },
     markAsDone(task) {
-      task.done = true;
+      task.done = !task.done;
       this.distributeTasks();
     },
     distributeTasks() {
@@ -102,7 +102,6 @@ export default {
 .body{
   width: 100vw; /*넓이 보는 화면에 맞춰서 조절*/
   height: 100vh;
-  
   font-family: Arial, sans-serif;
   background-color: #2dc987; /* 녹색 배경 */
   display: flex;
@@ -125,7 +124,6 @@ export default {
   flex: 1;
   gap: 20px;
   height: 100%;
-  
 }
 .task-columns {
   flex: 1;

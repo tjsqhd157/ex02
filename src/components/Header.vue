@@ -64,6 +64,7 @@ export default {
 .logo {
   font-size: 24px;
   color: #25cd94;
+  font-weight: bold;
 }
 .calendar-btn{
   background-color: #C9F4E9;

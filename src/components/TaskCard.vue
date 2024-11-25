@@ -4,10 +4,11 @@
       <span class="task-tags" :style="{ backgroundColor: task.tagColor }">
       </span>
       <div class="task-actions">
-        <button v-if="!task.noDoneButton && !task.done" class="task-done" @click="markAsDone">
-          <img src="@/assets/images/checked.png" alt="Done" class="done-icon" />
+        <button v-if="!task.noDoneButton" class="task-done" @click="markAsDone">
+          <img v-if="!task.done" src="@/assets/images/checked.png" alt="Done" class="done-icon" />
+          <img v-if="task.done" src="@/assets/images/checked_green.png" alt="Task Done" class="done-icon"  />
         </button>
-        <img v-if="task.done" src="@/assets/images/checked_green.png" alt="Task Done" class="done-icon" />
+        
         <button class="task-delete" @click="deleteTask">
           <img src="@/assets/images/delete.png" alt="Done" class="done-icon" />
         </button>
