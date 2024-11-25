@@ -2,7 +2,7 @@
   <div class="screen">
     <div class="main">
       <div>
-        <img src="../assets/images/checked.png" />
+        <img src="../assets/images/checked_white.png" />
       </div>
       <div>
         <p class="heading-sign-in-to">
