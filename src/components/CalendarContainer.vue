@@ -5,7 +5,7 @@
           <span><img src="@/assets/images/checked_green.png" /></span> DoitU
         </div>
         <div class="navigation">
-          <button class="calendar-btn">Calendar</button>
+          <button class="calendar-btn" @click="goToMain">Calendar</button>
           <div class="status-filters">
             <button class="status all">All</button>
             <button class="status working">
@@ -31,6 +31,11 @@
   
   export default {
     name: "CalendarContainer",
+    methods:{
+      goToMain(){
+        this.$router.push("/mainContainer"); 
+      },
+    },
     components: {
       Calendar, // 캘린더 컴포넌트 등록
     },

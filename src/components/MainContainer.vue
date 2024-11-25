@@ -232,7 +232,8 @@ export default {
       this.newTask.tag = this.newTask.tag === tag ? null : tag;
     },
     goToCalendar() {
-      alert("Navigate to Calendar!");
+      this.$router.push("/calendar"); // '/calendar' 경로로 이동
+      
     },
   },
   mounted() {
