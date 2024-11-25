@@ -34,7 +34,7 @@
 </template>
 
 <script>
-//import axios from "axios"; //spring과 연동을 위한 axios import
+import axios from "axios"; //spring과 연동을 위한 axios import
 
 export default {
   name: "LoginFrame",
@@ -50,28 +50,29 @@ export default {
     },
     signIn() {
 
-      // axios
-      //   .post("/signin", {
-      //     userId: this.userId,
-      //     password: this.password,
-      //   })
-      //   .then((response) => {
-      //     if (response.data.statusCode === 200) {
-      //       this.$cookies.set("session_id", response.data.sessionId, {
-      //         expires: "1d",
-      //       });
-      //       alert("로그인 성공");
-      //     } else {
-      //       alert("로그인 실패: " + response.data.statusCode);
-      //     }
-      //   })
-      //   .catch((error) => {
-      //     alert("로그인 실패: " + error.message);
-      //   });
+      axios
+        .post("/signin", {
+          userId: this.userId,
+          password: this.password,
+        })
+        .then((response) => {
+          if (response.data.statusCode === 200) {
+            this.$cookies.set("session_id", response.data.sessionId, {
+              expires: "1d",
+            });
+            alert("로그인 성공");
+            this.$router.push("/maincontainer");
+          } else {
+            alert("로그인 실패: " + response.data.statusCode);
+          }
+        })
+        .catch((error) => {
+          alert("로그인 실패: " + error.message);
+        });
       // 위는 api 구현 전 로그인 성공 로직 추가 코드 (사용자 인증)
       // axios 요청을 위해서는 1. axios를 import 해줘야함. 2.data() 안에 보낼 데이터가 존재해야함. 
       
-      this.$router.push("/maincontainer"); // '/main' 경로로 이동
+       // '/main' 경로로 이동
     },
   },
 };
