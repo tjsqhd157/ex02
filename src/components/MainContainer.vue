@@ -77,7 +77,8 @@ export default {
       });
     },
     goToCalendar() {
-      alert("Navigate to Calendar!");
+      this.$router.push("/calendar"); // '/calendar' 경로로 이동
+      
     },
     handleFilterStatus(status) {
       this.filterStatus = status;
