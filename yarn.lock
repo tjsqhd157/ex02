@@ -8460,7 +8460,7 @@ vue-loader@^17.0.0:
 
 vue-router@^4.4.5:
   version "4.4.5"
-  resolved "https://registry.npmjs.org/vue-router/-/vue-router-4.4.5.tgz"
+  resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-4.4.5.tgz#bdf535e4cf32414ebdea6b4b403593efdb541388"
   integrity sha512-4fKZygS8cH1yCyuabAXGUAsyi1b2/o/OKgu/RUb+znIYOxPRxdkytJEx+0wGcpBE1pX6vUgh5jwWOKRGvuA/7Q==
   dependencies:
     "@vue/devtools-api" "^6.6.4"

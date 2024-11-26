@@ -30,7 +30,7 @@
 
 
 <script>
-// import axios from "axios";
+ import axios from "axios";
 
 export default {
   name: "LoginFrame",
@@ -44,24 +44,24 @@ export default {
   },
   methods: {
     signUp() {
-      // 백엔드의 실제 URL 작성
-      // axios
-      //   .post("/signup", {
-      //     userId: this.formData.userId,
-      //     password: this.formData.password,
-      //   })
-      //   .then((response) => {
-      //     if (response.data.statusCode === 200) {
-      //       alert("Sign-up successful");
-      //       this.$router.push("/success");
-      //     } else {
-      //       alert("Sign-up failed: " + response.data.message);
-      //     }
-      //   })
-      //   .catch((error) => {
-      //     alert("Sign-up failed: " + error.message);
-      //   });
-      this.$router.push("/success");
+      
+      axios
+        .post("/signup", {
+          userId: this.formData.userId,
+          password: this.formData.password,
+        })
+        .then((response) => {
+          if (response.data.statusCode === 200) {
+            alert("Sign-up successful");
+            this.$router.push("/success");
+          } else {
+            alert("Sign-up failed: " + response.data.message);
+          }
+        })
+        .catch((error) => {
+          alert("Sign-up failed: " + error.message);
+        });
+      // this.$router.push("/success");
     },
   },
 };

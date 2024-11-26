@@ -9,7 +9,7 @@
         <label for="id">ID</label>
         <input
           type="text"
-          v-model="userid"
+          v-model="userId"
           id="id"
           name="id"
           placeholder="Enter your ID"
@@ -40,16 +40,15 @@ export default {
   name: "LoginFrame",
   data() {
     return {
-      userid: "",
+      userId: "",
       password: "",
     };
   },
   methods: {
     goToSignUp() {
-      this.$router.push("/signup"); // '/signup' 경로로 이동
+      this.$router.push("/SignUp"); // '/signup' 경로로 이동
     },
     signIn() {
-
       axios
         .post("/signin", {
           userId: this.userId,
@@ -57,9 +56,6 @@ export default {
         })
         .then((response) => {
           if (response.data.statusCode === 200) {
-            this.$cookies.set("session_id", response.data.sessionId, {
-              expires: "1d",
-            });
             alert("로그인 성공");
             this.$router.push("/maincontainer");
           } else {
@@ -70,9 +66,9 @@ export default {
           alert("로그인 실패: " + error.message);
         });
       // 위는 api 구현 전 로그인 성공 로직 추가 코드 (사용자 인증)
-      // axios 요청을 위해서는 1. axios를 import 해줘야함. 2.data() 안에 보낼 데이터가 존재해야함. 
-      
-       // '/main' 경로로 이동
+      // axios 요청을 위해서는 1. axios를 import 해줘야함. 2.data() 안에 보낼 데이터가 존재해야함.
+
+      // '/main' 경로로 이동
     },
   },
 };
@@ -80,7 +76,6 @@ export default {
 
 <style>
 /* 기존 스타일 유지 */
-
 
 .login-frame {
   background-color: #25cd94;
