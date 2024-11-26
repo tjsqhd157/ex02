@@ -79,10 +79,10 @@ export default {
       return this.dayData.find((d) => d.date === formattedDate);
     },
     onDayClick(day) {
-      const formattedDate = day.date.toISOString().split("T")[0];
+      const formattedDate = day.date.toLocaleDateString("en-CA"); // "YYYY-MM-DD" 형식
       this.selectedDayData = this.getDayData(day.date) || { events: [] };
-      this.selectedDate = formattedDate;
-      this.isModalOpen = true;
+      this.selectedDate = formattedDate; // 선택된 날짜 설정
+      this.isModalOpen = true; // 모달 열기
     },
     handleModalClose({ emoji, diary }) {
       console.log("감정:", emoji, "일기:", diary);
