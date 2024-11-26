@@ -68,10 +68,11 @@ export default {
   background-color: #1f883d;
   border: 1px solid;
   border-color: #1f232826;
-  border-radius: 6px;
+  border-radius: 15px;
   flex-direction: column;
   overflow: hidden;
   width: 300px;
+  height: 45px;
 }
 
 .screen .text {

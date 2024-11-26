@@ -1,6 +1,5 @@
 <template>
   <div class="sidebar">
-    <!-- Title Input -->
     <div class="title-container">
       <label for="title" class="label">제목</label>
       <input
@@ -12,7 +11,6 @@
       />
     </div>
 
-    <!-- Content Input -->
     <div class="content-container">
       <label for="content" class="label">내용</label>
       <textarea
@@ -23,7 +21,6 @@
       ></textarea>
     </div>
 
-    <!-- Routine Selector -->
     <div>
       <label class="label">루틴</label>
       <div class="routine-container">
@@ -38,7 +35,6 @@
       </div>
     </div>
 
-    <!-- Tag Selector -->
     <div>
       <label class="label">태그</label>
       <div class="tags">
@@ -48,19 +44,18 @@
           :style="{ backgroundColor: tag }"
           class="tag-button"
           :class="{ active: newTask.tag === tag }"
-          @click="selectTag(tag) "
+          @click="selectTag(tag)"
         ></button>
       </div>
     </div>
 
-    <!-- Add Button -->
     <button class="add-button" @click="addTask">add</button>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'TaskSidebar',
+  name: "TaskSidebar",
   props: {
     days: Array,
     tagColors: Array,
@@ -78,18 +73,22 @@ export default {
   methods: {
     toggleRoutine(day) {
       const index = this.newTask.routine.indexOf(day);
-      if (index > -1) this.newTask.routine.splice(index, 1);
-      else this.newTask.routine.push(day);
+      if (index > -1) {
+        this.newTask.routine.splice(index, 1);
+      } else {
+        this.newTask.routine.push(day);
+      }
     },
     selectTag(tag) {
       this.newTask.tag = this.newTask.tag === tag ? null : tag;
-      this.newTask.tagColor = tag;
-      this.$emit('tagSelected', tag);
     },
     addTask() {
+      console.log("Task being sent:", this.newTask);
       if (this.newTask.title && this.newTask.content) {
-        this.$emit('addTask', { ...this.newTask });
+        this.$emit("addTask", { ...this.newTask });
         this.newTask = { title: "", content: "", routine: [], tag: null };
+      } else {
+        alert("제목과 내용을 입력해주세요!");
       }
     },
   },

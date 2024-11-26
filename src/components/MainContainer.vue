@@ -1,12 +1,25 @@
 <template>
-  <div class="body"> 
+  <div class="body">
     <div class="container">
-      <Header :workingCount="workingCount" :doneCount="doneCount" @navigateToCalendar="goToCalendar" @filterStatus="handleFilterStatus" />
+      <Header
+        :workingCount="workingCount"
+        :doneCount="doneCount"
+        @navigateToCalendar="goToCalendar"
+        @filterStatus="handleFilterStatus"
+      />
       <div class="content">
-        <Sidebar :days="days" :tagColors="tagColors" @addTask="addTask" />
+        <Sidebar :tagColors="tagColors" :days="days" @addTask="handleAddTask" />
         <div class="task-columns">
-          <TaskColumn :tasks="filteredLeftTasks" @markAsDone="markAsDone" @deleteTask="deleteTask" />
-          <TaskColumn :tasks="filteredRightTasks" @markAsDone="markAsDone" @deleteTask="deleteTask" />
+          <TaskColumn
+            :tasks="filteredLeftTasks"
+            @markAsDone="markAsDone"
+            @deleteTask="deleteTask"
+          />
+          <TaskColumn
+            :tasks="filteredRightTasks"
+            @markAsDone="markAsDone"
+            @deleteTask="deleteTask"
+          />
         </div>
       </div>
     </div>
@@ -14,10 +27,11 @@
 </template>
 
 <script>
-import Header from './Header.vue';
-import Sidebar from './TaskSideBar.vue';
-import TaskColumn from './TaskColumn.vue';
-
+import Header from "./Header.vue";
+import Sidebar from "./TaskSideBar.vue";
+import TaskColumn from "./TaskColumn.vue";
+import axios from "axios";
+axios.defaults.withCredentials = true; // 쿠키를 전송하기 위해 설정
 export default {
   components: {
     Header,
@@ -26,74 +40,87 @@ export default {
   },
   data() {
     return {
-      allTasks: [], // Unified list of all tasks
-      days: ["일", "월", "화", "수", "목", "금", "토"],
+      allTasks: [],
       tagColors: ["#80D8FF", "#FFD740", "#FFAB91", "#CE93D8", "#A5D6A7"],
-      filterStatus: 'all', // all, done, working
+      days: ["일", "월", "화", "수", "목", "금", "토"],
+      filterStatus: "all",
     };
   },
   computed: {
     workingCount() {
-      return this.allTasks.filter(task => !task.done).length; // Total working task count
+      return this.allTasks.filter((task) => !task.done).length;
     },
     doneCount() {
-      return this.allTasks.filter(task => task.done).length; // Total done task count
+      return this.allTasks.filter((task) => task.done).length;
     },
     filteredLeftTasks() {
       return this.getFilteredTasks().filter((task, index) => index % 2 === 0);
     },
     filteredRightTasks() {
       return this.getFilteredTasks().filter((task, index) => index % 2 !== 0);
-    }
+    },
   },
   methods: {
-    addTask(newTask) {
-      const task = { ...newTask, id: Date.now(), done: false ,  
-      hasRoutine: newTask.routine && newTask.routine.length > 0, // 루틴이 설정되어 있는지 여부 저장
-      routineDays: newTask.routine || []
-      };
-      if (task.hasRoutine) {
-      task.noDoneButton = true; // 루틴이 설정된 경우 done 버튼 없이 생성
-      this.allTasks.unshift(task); // 루틴이 설정된 경우 리스트의 맨 앞에 추가
-      } else {
-      this.allTasks.push(task); // 루틴이 없는 경우 리스트의 맨 뒤에 추가
-      }
-      this.distributeTasks();
-    },
+async handleAddTask(newTask) {
+  const routineData = {
+    sun: newTask.routine.includes("일"),
+    mon: newTask.routine.includes("월"),
+    tue: newTask.routine.includes("화"),
+    wed: newTask.routine.includes("수"),
+    thr: newTask.routine.includes("목"),
+    fri: newTask.routine.includes("금"),
+    sat: newTask.routine.includes("토"),
+  };
+
+  // 순서를 보장한 객체 생성
+  const payload = {
+    title: newTask.title, // 순서 1
+    content: newTask.content, // 순서 2
+    sun: routineData.sun, // 순서 3
+    mon: routineData.mon, // 순서 4
+    tue: routineData.tue, // 순서 5
+    wed: routineData.wed, // 순서 6
+    thr: routineData.thr, // 순서 7
+    fri: routineData.fri, // 순서 8
+    sat: routineData.sat, // 순서 9
+    color: newTask.tag || "BLUE", // 순서 10
+  };
+
+  console.log("Payload being sent:", payload);
+ 
+
+  try {
+    const response = await axios.post("/doitu/api/todoList/create", payload);
+    console.log("Task created:", response.data);
+    this.allTasks.push({ ...response.data, done: false });
+  } catch (error) {
+    console.error("Error creating task:", error.response || error.message);
+   
+   alert("Task 생성 중 오류가 발생했습니다. "+ error.message);
+  }
+},
+
     deleteTask(taskId) {
       this.allTasks = this.allTasks.filter((task) => task.id !== taskId);
-      this.distributeTasks();
     },
     markAsDone(task) {
       task.done = !task.done;
-      this.distributeTasks();
-    },
-    distributeTasks() {
-      this.leftTasks = [];
-      this.rightTasks = [];
-      this.allTasks.forEach((task, index) => {
-        if (index % 2 === 0) this.leftTasks.push(task);
-        else this.rightTasks.push(task);
-      });
     },
     goToCalendar() {
-      this.$router.push("/calendar"); // '/calendar' 경로로 이동
-      
+      this.$router.push("/calendar");
     },
     handleFilterStatus(status) {
       this.filterStatus = status;
     },
     getFilteredTasks() {
-      if (this.filterStatus === 'done') {
-        return this.allTasks.filter(task => task.done);
-      } else if (this.filterStatus === 'working') {
-        return this.allTasks.filter(task => !task.done);
+      if (this.filterStatus === "done") {
+        return this.allTasks.filter((task) => task.done);
       }
-      return this.allTasks; 
-    }
-  },
-  mounted() {
-    this.distributeTasks();
+      if (this.filterStatus === "working") {
+        return this.allTasks.filter((task) => !task.done);
+      }
+      return this.allTasks;
+    },
   },
 };
 </script>
