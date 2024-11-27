@@ -27,7 +27,7 @@ export default {
     goToMain(){this.$router.push("/sigin");}
   },
   components: {},
-  // 푸시테스트
+  
 };
 </script>
 
