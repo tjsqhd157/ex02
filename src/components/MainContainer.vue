@@ -32,6 +32,7 @@ import Sidebar from "./TaskSideBar.vue";
 import TaskColumn from "./TaskColumn.vue";
 import axios from "axios";
 axios.defaults.withCredentials = true; // 쿠키를 전송하기 위해 설정
+
 export default {
   components: {
     Header,
@@ -40,6 +41,7 @@ export default {
   },
   data() {
     return {
+      
       allTasks: [],
       tagColors: ["#80D8FF", "#FFD740", "#FFAB91", "#CE93D8", "#A5D6A7"],
       days: ["일", "월", "화", "수", "목", "금", "토"],
@@ -60,51 +62,95 @@ export default {
       return this.getFilteredTasks().filter((task, index) => index % 2 !== 0);
     },
   },
+  created() {
+    axios
+      .get("/doitu/api/todoList/ALL")
+      .then((response) => {
+        if (response.data.statusCode === 200) {
+          alert("데이터 불러오기 성공");
+          this.allTasks = response.data; // 데이터를 ALL_List에 저장
+          console.log(this.allTasks);
+        } else {
+          alert("데이터 불러오기 실패");
+        }
+      })
+      .catch((error) => {
+        alert("데이터 불러오기 실패: " + error.message);
+      });
+  },
+
   methods: {
-async handleAddTask(newTask) {
-  const routineData = {
-    sun: newTask.routine.includes("일"),
-    mon: newTask.routine.includes("월"),
-    tue: newTask.routine.includes("화"),
-    wed: newTask.routine.includes("수"),
-    thr: newTask.routine.includes("목"),
-    fri: newTask.routine.includes("금"),
-    sat: newTask.routine.includes("토"),
-  };
+    async handleAddTask(newTask) {
+      const routineData = {
+        sun: newTask.routine.includes("일"),
+        mon: newTask.routine.includes("월"),
+        tue: newTask.routine.includes("화"),
+        wed: newTask.routine.includes("수"),
+        thr: newTask.routine.includes("목"),
+        fri: newTask.routine.includes("금"),
+        sat: newTask.routine.includes("토"),
+      };
 
-  // 순서를 보장한 객체 생성
-  const payload = {
-    title: newTask.title, // 순서 1
-    content: newTask.content, // 순서 2
-    sun: routineData.sun, // 순서 3
-    mon: routineData.mon, // 순서 4
-    tue: routineData.tue, // 순서 5
-    wed: routineData.wed, // 순서 6
-    thr: routineData.thr, // 순서 7
-    fri: routineData.fri, // 순서 8
-    sat: routineData.sat, // 순서 9
-    color: newTask.tag || "BLUE", // 순서 10
-  };
+      // 순서를 보장한 객체 생성
+      const payload = {
+        title: newTask.title, // 순서 1
+        content: newTask.content, // 순서 2
+        sun: routineData.sun, // 순서 3
+        mon: routineData.mon, // 순서 4
+        tue: routineData.tue, // 순서 5
+        wed: routineData.wed, // 순서 6
+        thr: routineData.thr, // 순서 7
+        fri: routineData.fri, // 순서 8
+        sat: routineData.sat, // 순서 9
+        color: newTask.tag || "BLUE", // 순서 10
+      };
 
-  console.log("Payload being sent:", payload);
- 
+      console.log("Payload being sent:", payload);
 
-  try {
-    const response = await axios.post("/doitu/api/todoList/create", payload);
-    console.log("Task created:", response.data);
-    this.allTasks.push({ ...response.data, done: false });
-  } catch (error) {
-    console.error("Error creating task:", error.response || error.message);
-   
-   alert("Task 생성 중 오류가 발생했습니다. "+ error.message);
-  }
-},
+      try {
+        const response = await axios.post(
+          "/doitu/api/todoList/create",
+          payload
+        );
+        console.log("Task created:", response.data);
+        this.allTasks.push({ ...response.data, done: false });
+      } catch (error) {
+        console.error("Error creating task:", error.response || error.message);
 
+        alert("Task 생성 중 오류가 발생했습니다. " + error.message);
+      }
+    },
+    addTask(newTask) {
+      const task = {
+        ...newTask,
+        id: Date.now(),
+        done: false,
+        hasRoutine: newTask.routine && newTask.routine.length > 0, // 루틴이 설정되어 있는지 여부 저장
+        routineDays: newTask.routine || [],
+      };
+      if (task.hasRoutine) {
+        task.noDoneButton = true; // 루틴이 설정된 경우 done 버튼 없이 생성
+        this.allTasks.unshift(task); // 루틴이 설정된 경우 리스트의 맨 앞에 추가
+      } else {
+        this.allTasks.push(task); // 루틴이 없는 경우 리스트의 맨 뒤에 추가
+      }
+      this.distributeTasks();
+    },
     deleteTask(taskId) {
       this.allTasks = this.allTasks.filter((task) => task.id !== taskId);
+      this.distributeTasks();
     },
     markAsDone(task) {
       task.done = !task.done;
+      this.distributeTasks();
+    },
+    distributeTasks() {
+      this.leftTasks = [];
+      this.rightTasks = [];
+      this.allTasks.forEach((task, index) => {
+        if (index % 2 === 0) this.leftTasks.push(task);
+        else this.rightTasks.push(task);
+      });
     },
     goToCalendar() {
       this.$router.push("/calendar");
@@ -122,11 +168,14 @@ async handleAddTask(newTask) {
       return this.allTasks;
     },
   },
+  mounted() {
+    this.distributeTasks();
+  },
 };
 </script>
 
 <style scoped>
-.body{
+.body {
   width: 100vw; /*넓이 보는 화면에 맞춰서 조절*/
   height: 100vh;
   font-family: Arial, sans-serif;
@@ -134,7 +183,7 @@ async handleAddTask(newTask) {
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow : hidden; /* 수평 스크롤 방지 */
+  overflow: hidden; /* 수평 스크롤 방지 */
 }
 .container {
   flex-direction: column;
