@@ -41,7 +41,6 @@ export default {
   },
   data() {
     return {
-      
       allTasks: [],
       tagColors: ["#80D8FF", "#FFD740", "#FFAB91", "#CE93D8", "#A5D6A7"],
       days: ["일", "월", "화", "수", "목", "금", "토"],
@@ -62,22 +61,22 @@ export default {
       return this.getFilteredTasks().filter((task, index) => index % 2 !== 0);
     },
   },
-  created() {
-    axios
-      .get("/doitu/api/todoList/ALL")
-      .then((response) => {
-        if (response.data.statusCode === 200) {
-          alert("데이터 불러오기 성공");
-          this.allTasks = response.data; // 데이터를 ALL_List에 저장
-          console.log(this.allTasks);
-        } else {
-          alert("데이터 불러오기 실패");
-        }
-      })
-      .catch((error) => {
-        alert("데이터 불러오기 실패: " + error.message);
-      });
-  },
+  // created() {
+  //   axios
+  //     .get("/doitu/api/todoList/ALL")
+  //     .then((response) => {
+  //       if (response.data.statusCode === 200) {
+  //         alert("데이터 불러오기 성공");
+  //         this.allTasks = response.data; // 데이터를 ALL_List에 저장
+  //         console.log(this.allTasks);
+  //       } else {
+  //         alert("데이터 불러오기 실패");
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       alert("데이터 불러오기 실패: " + error.message);
+  //     });
+  // },
 
   methods: {
     async handleAddTask(newTask) {
@@ -114,6 +113,20 @@ export default {
         );
         console.log("Task created:", response.data);
         this.allTasks.push({ ...response.data, done: false });
+        axios
+          .get("/doitu/api/todoList/ALL")
+          .then((response) => {
+            if (response.data.statusCode === 200) {
+              alert("데이터 불러오기 성공");
+              this.allTasks = response.data; // 데이터를 ALL_List에 저장
+              console.log(this.allTasks);
+            } else {
+              alert("데이터 불러오기 실패");
+            }
+          })
+          .catch((error) => {
+            alert("데이터 불러오기 실패: " + error.message);
+          });
       } catch (error) {
         console.error("Error creating task:", error.response || error.message);
 
