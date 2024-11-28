@@ -2,10 +2,9 @@
   <div class="task-column">
     <TaskCard
       v-for="(task, index) in tasks"
-      :key="task.id"
+      :key="`${task.id}-${index}`"
       :task="task"
       :index="index"
-      :noDoneButton="task.noDoneButton" 
       @markAsDone="markAsDone"
       @deleteTask="deleteTask"
     />
@@ -20,15 +19,22 @@ export default {
     TaskCard,
   },
   props: {
-    tasks: Array,
-    noDoneButton: Boolean, /*done버튼이 있는지 없는지 확인하는 변수 */
+    tasks: {
+      type: Array,
+      default: () => [], // 기본값 설정
+    },
+    noDoneButton: Boolean,
+  },
+  mounted() {
+    // tasks 데이터 확인 (컴포넌트가 렌더링된 후)
+    console.log("Tasks data in TaskColumn:", this.tasks);
   },
   methods: {
     markAsDone(task) {
-      this.$emit('markAsDone', task);
+      this.$emit("markAsDone", task);
     },
     deleteTask(taskId) {
-      this.$emit('deleteTask', taskId);
+      this.$emit("deleteTask", taskId);
     },
   },
 };

@@ -5,20 +5,20 @@
         :workingCount="workingCount"
         :doneCount="doneCount"
         @navigateToCalendar="goToCalendar"
-        @filterStatus="handleFilterStatus"
+        @filterStatus="filteredTasks"
       />
       <div class="content">
         <Sidebar :tagColors="tagColors" :days="days" @addTask="handleAddTask" />
-        <div class="task-columns">
+        <div class="task-columns" >
           <TaskColumn
-            :tasks="filteredLeftTasks"
+            :tasks="this.allTasks.routineDto"
             @markAsDone="markAsDone"
-            @deleteTask="deleteTask"
+            @deleteTask="deleteRoutine"
           />
           <TaskColumn
-            :tasks="filteredRightTasks"
+            :tasks="this.allTasks.todoDto"
             @markAsDone="markAsDone"
-            @deleteTask="deleteTask"
+            @deleteTask="deleteTodo"
           />
         </div>
       </div>
@@ -41,8 +41,10 @@ export default {
   },
   data() {
     return {
-      
       allTasks: [],
+      addTasks: [],
+      rotineList : [],
+      todoList : [],
       tagColors: ["#80D8FF", "#FFD740", "#FFAB91", "#CE93D8", "#A5D6A7"],
       days: ["일", "월", "화", "수", "목", "금", "토"],
       filterStatus: "all",
@@ -50,26 +52,39 @@ export default {
   },
   computed: {
     workingCount() {
-      return this.allTasks.filter((task) => !task.done).length;
+      return this.allTasks.todoDto.filter((task) => task.done).length + this.allTasks.todoDto.filter((task) => task.done).length;
     },
     doneCount() {
-      return this.allTasks.filter((task) => task.done).length;
+      return this.allTasks.todoDto.filter((task) => task.done).length;
     },
     filteredLeftTasks() {
-      return this.getFilteredTasks().filter((task, index) => index % 2 === 0);
+      return this.allTasks.routineDto.filter((task, index) => index % 2 === 0);
     },
     filteredRightTasks() {
-      return this.getFilteredTasks().filter((task, index) => index % 2 !== 0);
+      return this.allTasks.routineDto.filter((task, index) => index % 2 !== 0);
     },
+     
+    filteredTasks() {
+    if (this.filterStatus === "done") {
+      return this.allTasks.todoDto.filter(task => task.done); // done=true
+    } else if (this.filterStatus === "working") {
+      return this.allTasks.todoDto.filter(task => !task.done); // done=false
+    }
+    return this.allTasks.todoDto; // 전체 보기
   },
+
+    },
+
   created() {
     axios
       .get("/doitu/api/todoList/ALL")
       .then((response) => {
         if (response.data.statusCode === 200) {
           alert("데이터 불러오기 성공");
-          this.allTasks = response.data; // 데이터를 ALL_List에 저장
-          console.log(this.allTasks);
+          this.rotineList = response.data.routineDto || []; // 데이터를 ALL_List에 저장
+          this.todoList = response.data.todoDto || [] ;
+          this.allTasks = response.data || [];
+          this.addIsRoutineToRoutineDto();
         } else {
           alert("데이터 불러오기 실패");
         }
@@ -80,6 +95,27 @@ export default {
   },
 
   methods: {
+
+    dataUP(){
+    axios
+      .get("/doitu/api/todoList/ALL")
+      .then((response) => {
+        if (response.data.statusCode === 200) {
+          alert("데이터 불러오기 성공");
+          this.rotineList = response.data.routineDto || []; // 데이터를 ALL_List에 저장
+          this.todoList = response.data.todoDto || [] ;
+          this.allTasks = response.data || [];
+          console.log("mergedTasks:", this.allTasks); // 데이터 설정 후 mergedTasks 출력 
+          this.addIsRoutineToRoutineDto();
+        } else {
+          alert("데이터 불러오기 실패");
+        }
+      })
+      .catch((error) => {
+        alert("데이터 불러오기 실패: " + error.message);
+      });  
+    },
+
     async handleAddTask(newTask) {
       const routineData = {
         sun: newTask.routine.includes("일"),
@@ -113,63 +149,107 @@ export default {
           payload
         );
         console.log("Task created:", response.data);
-        this.allTasks.push({ ...response.data, done: false });
+        this.addTasks.push({ ...response.data, done: false });
+        this.dataUP();
       } catch (error) {
         console.error("Error creating task:", error.response || error.message);
-
         alert("Task 생성 중 오류가 발생했습니다. " + error.message);
       }
     },
-    addTask(newTask) {
-      const task = {
-        ...newTask,
-        id: Date.now(),
-        done: false,
-        hasRoutine: newTask.routine && newTask.routine.length > 0, // 루틴이 설정되어 있는지 여부 저장
-        routineDays: newTask.routine || [],
-      };
-      if (task.hasRoutine) {
-        task.noDoneButton = true; // 루틴이 설정된 경우 done 버튼 없이 생성
-        this.allTasks.unshift(task); // 루틴이 설정된 경우 리스트의 맨 앞에 추가
-      } else {
-        this.allTasks.push(task); // 루틴이 없는 경우 리스트의 맨 뒤에 추가
-      }
-      this.distributeTasks();
-    },
-    deleteTask(taskId) {
-      this.allTasks = this.allTasks.filter((task) => task.id !== taskId);
-      this.distributeTasks();
-    },
-    markAsDone(task) {
-      task.done = !task.done;
-      this.distributeTasks();
-    },
-    distributeTasks() {
-      this.leftTasks = [];
-      this.rightTasks = [];
-      this.allTasks.forEach((task, index) => {
-        if (index % 2 === 0) this.leftTasks.push(task);
-        else this.rightTasks.push(task);
+     
+  addIsRoutineToRoutineDto() {
+    if (this.allTasks.routineDto && Array.isArray(this.allTasks.routineDto)) {
+      this.allTasks.routineDto = this.allTasks.routineDto.map((task) => {
+        // 요일이 true인 경우 해당 요일 이름을 day 배열에 추가
+        const day = [];
+        if (task.sun) day.push("일요일");
+        if (task.mon) day.push("월요일");
+        if (task.tue) day.push("화요일");
+        if (task.wed) day.push("수요일");
+        if (task.thr) day.push("목요일");
+        if (task.fri) day.push("금요일");
+        if (task.sat) day.push("토요일");
+
+        // day 배열에 값이 있으면 isRoutine: true, 없으면 false
+        return {
+          ...task,
+          day, // 요일 배열 추가
+          isRoutine: day.length > 0,
+        };
       });
+
+      console.log("Updated routineDto with day and isRoutine:", this.allTasks.routineDto);
+    } else {
+      console.error("routineDto is not an array or is undefined");
+    }
+  },
+
+
+
+  // Todo 삭제 메서드
+  async deleteTodo(todoId) {
+    try {
+      const response = await axios.delete(`/doitu/api/todoList/todo/delete/${todoId}`);
+      if (response.data.statusCode === 200) {
+        console.log("Todo 삭제 성공");
+        this.todoList = this.todoList.filter(task => task.id !== todoId); // UI에서 해당 todo 제거
+      } else {
+        console.error("Todo 삭제 실패: ", response.data);
+      }
+    } catch (error) {
+      console.error("삭제 요청 중 오류 발생: ", error.message);
+    }
+  },
+
+  // Routine 삭제 메서드
+  async deleteRoutine(routineId) {
+    try {
+      const response = await axios.delete(`/doitu/api/todoList/routine/delete/${routineId}`);
+      if (response.data.statusCode === 200) {
+        console.log("Routine 삭제 성공");
+        this.routineList = this.routineList.filter(routine => routine.id !== routineId); // UI에서 해당 routine 제거
+      } else {
+        console.error("Routine 삭제 실패: ", response.data);
+      }
+    } catch (error) {
+      console.error("삭제 요청 중 오류 발생: ", error.message);
+    }
+  },
+},
+   showDoneTasks() {
+    this.filterStatus = "done";
+  },
+  showAllTasks() {
+    this.filterStatus = "all";
+  },
+  
+  markAsDone() {
+  this.todoList = [];
+  this.allTasks = [];
+
+  axios
+    .get("/doitu/api/todoList/DONE")
+    .then((response) => {
+      if (response.data.statusCode === 200) {
+        alert("데이터 불러오기 성공");
+
+        this.allTasks = response.data.todoDto || [];
+        console.log("Updated todoList and allTasks:", this.todoList, this.allTasks);
+      } else {
+        alert("데이터 불러오기 실패");
+      }
+    })
+    .catch((error) => {
+      alert("데이터 불러오기 실패: " + error.message);
+    });
     },
+
     goToCalendar() {
       this.$router.push("/calendar");
     },
-    handleFilterStatus(status) {
-      this.filterStatus = status;
-    },
-    getFilteredTasks() {
-      if (this.filterStatus === "done") {
-        return this.allTasks.filter((task) => task.done);
-      }
-      if (this.filterStatus === "working") {
-        return this.allTasks.filter((task) => !task.done);
-      }
-      return this.allTasks;
-    },
-  },
+
   mounted() {
-    this.distributeTasks();
+   
   },
 };
 </script>

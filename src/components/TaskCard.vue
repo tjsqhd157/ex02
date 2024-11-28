@@ -1,10 +1,10 @@
 <template>
-  <div class="task-card" :class="{ done: task.done, routine: task.hasRoutine }">
+  <div class="task-card" :class="{ done: task.done, isRoutine: task.isRoutine }">
     <div class="task-header">
-      <span class="task-tags" :style="{ backgroundColor: task.tagColor }">
+      <span class="task-tags" :style="{ backgroundColor: task.color }"> {{index +1}}
       </span>
       <div class="task-actions">
-        <button v-if="!task.noDoneButton" class="task-done" @click="markAsDone">
+        <button v-if="!task.isRoutine" class="task-done" @click="markAsDone">
           <img v-if="!task.done" src="@/assets/images/checked_black.png" alt="Done" class="done-icon" />
           <img v-if="task.done" src="@/assets/images/checked_green.png" alt="Task Done" class="done-icon"  />
         </button>
@@ -19,7 +19,7 @@
       <p class="task-content">{{ task.content }}</p>
     </div>
     <div class="task-footer">
-        <span v-for="(day, i) in task.routine" :key="i" class="task-day">
+        <span v-for="(day, i) in task.day" :key="i" class="task-day">
           {{ day }}
         </span>
     </div>
@@ -31,7 +31,6 @@ export default {
   props: {
     task: Object,
     index: Number,
-    noDoneButton: Boolean,  
   },
   methods: {
     markAsDone() {
@@ -53,8 +52,8 @@ export default {
   padding: 1px;
   font-family: Arial, sans-serif;
 }
-.task-card.routine {
-  background-color: #C9F4E9;
+.task-card.isRoutine {
+  background-color: yellow;
 }
 .task-header {
   display: flex;
