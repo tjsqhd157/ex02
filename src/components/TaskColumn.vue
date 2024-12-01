@@ -1,13 +1,23 @@
 <template>
-  <div class="task-column">
-    <TaskCard
-      v-for="(task, index) in tasks"
-      :key="`${task.id}-${index}`"
-      :task="task"
-      :index="index"
-      @markAsDone="markAsDone"
-      @deleteTask="deleteTask"
-    />
+  <div class = "task-column">
+      <TaskCard
+        v-for="(task, taskIndex) in tasks.routineDto"
+        :key="task.id"
+        :task="task"
+        :index="taskIndex"
+        @markAsDone="markAsDone"
+        @deleteTask="deleteTask"
+      />   
+  </div>
+  <div class = "task-column">
+      <TaskCard
+        v-for="(task, taskIndex) in tasks.todoDto"
+        :key= "task.id"
+        :task="task"
+        :index="taskIndex"
+        @markAsDone="markAsDone"
+        @deleteTask="deleteTask"
+      />   
   </div>
 </template>
 
@@ -20,21 +30,15 @@ export default {
   },
   props: {
     tasks: {
-      type: Array,
-      default: () => [], // 기본값 설정
+      type: Object
     },
-    noDoneButton: Boolean,
-  },
-  mounted() {
-    // tasks 데이터 확인 (컴포넌트가 렌더링된 후)
-    console.log("Tasks data in TaskColumn:", this.tasks);
   },
   methods: {
-    markAsDone(task) {
-      this.$emit("markAsDone", task);
-    },
+    markAsDone(taskId) {
+    this.$emit("markAsDone", taskId); // 부모 컴포넌트로 이벤트 전달
+  },
     deleteTask(taskId) {
-      this.$emit("deleteTask", taskId);
+      this.$emit('deleteTask', taskId);
     },
   },
 };

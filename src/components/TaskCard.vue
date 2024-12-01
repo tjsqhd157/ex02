@@ -4,7 +4,7 @@
       <span class="task-tags" :style="{ backgroundColor: task.color }"> {{index +1}}
       </span>
       <div class="task-actions">
-        <button v-if="!task.isRoutine" class="task-done" @click="markAsDone">
+        <button v-if="!task.isRoutine" class="task-done" @click="() => markAsDone()">
           <img v-if="!task.done" src="@/assets/images/checked_black.png" alt="Done" class="done-icon" />
           <img v-if="task.done" src="@/assets/images/checked_green.png" alt="Task Done" class="done-icon"  />
         </button>
@@ -34,7 +34,7 @@ export default {
   },
   methods: {
     markAsDone() {
-      this.$emit('markAsDone', this.task);
+      this.$emit("markAsDone", this.task.id); // 부모 컴포넌트로 이벤트 전달
     },
     deleteTask() {
       this.$emit('deleteTask', this.task.id);
@@ -51,6 +51,7 @@ export default {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 1px;
   font-family: Arial, sans-serif;
+  width: 100%;
 }
 .task-card.isRoutine {
   background-color: yellow;

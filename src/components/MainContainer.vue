@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div class="body">
     <div class="container">
       <Header
@@ -11,16 +11,11 @@
         <Sidebar :tagColors="tagColors" :days="days" @addTask="handleAddTask" />
         <div class="task-columns" >
           <TaskColumn
-            :tasks="this.allTasks.routineDto"
+            :tasks="this.allTasks"
             @markAsDone="markAsDone"
-            @deleteTask="deleteRoutine"
+            @deleteTask="deleteTask"
           />
-          <TaskColumn
-            :tasks="this.allTasks.todoDto"
-            @markAsDone="markAsDone"
-            @deleteTask="deleteTodo"
-          />
-        </div>
+        </div>  
       </div>
     </div>
   </div>
@@ -105,7 +100,7 @@ export default {
           this.rotineList = response.data.routineDto || []; // 데이터를 ALL_List에 저장
           this.todoList = response.data.todoDto || [] ;
           this.allTasks = response.data || [];
-          console.log("mergedTasks:", this.allTasks); // 데이터 설정 후 mergedTasks 출력 
+          console.log("mergedTasks:", this.allTasks); 
           this.addIsRoutineToRoutineDto();
         } else {
           alert("데이터 불러오기 실패");
@@ -187,19 +182,17 @@ export default {
 
 
   // Todo 삭제 메서드
-  async deleteTodo(todoId) {
+   async deleteTask(taskId) {
     try {
-      const response = await axios.delete(`/doitu/api/todoList/todo/delete/${todoId}`);
-      if (response.data.statusCode === 200) {
-        console.log("Todo 삭제 성공");
-        this.todoList = this.todoList.filter(task => task.id !== todoId); // UI에서 해당 todo 제거
-      } else {
-        console.error("Todo 삭제 실패: ", response.data);
-      }
+        const response = await axios.delete(`/doitu/api/todo/delete/${taskId}`);
+        if (response.status === 200) {
+            console.log("삭제 성공");
+        }
     } catch (error) {
-      console.error("삭제 요청 중 오류 발생: ", error.message);
+        console.error("삭제 요청 중 오류 발생:", error.message);
     }
-  },
+},
+
 
   // Routine 삭제 메서드
   async deleteRoutine(routineId) {
@@ -215,6 +208,28 @@ export default {
       console.error("삭제 요청 중 오류 발생: ", error.message);
     }
   },
+
+    async markAsDone(taskId) {
+    // 로컬 상태 업데이트
+    const taskIndex = this.allTasks.todoDto.findIndex(task => task.id === taskId);
+    if (taskIndex !== -1) {
+      this.allTasks.todoDto[taskIndex].done = !this.allTasks.todoDto[taskIndex].done;
+    }
+
+    // 서버와 동기화
+    try {
+    const response = await axios.post(`/doitu/api/todoList/done/${taskId}`);
+    if (response.data.statusCode === 200) {
+      alert("작업 완료 상태로 변경 성공!");
+    } else {
+      alert("상태 변경 실패: " + response.data.msg);
+    }
+  } catch (error) {
+    console.error("API 호출 중 오류 발생:", error.message);
+  }
+  },
+ 
+
 },
    showDoneTasks() {
     this.filterStatus = "done";
@@ -223,26 +238,6 @@ export default {
     this.filterStatus = "all";
   },
   
-  markAsDone() {
-  this.todoList = [];
-  this.allTasks = [];
-
-  axios
-    .get("/doitu/api/todoList/DONE")
-    .then((response) => {
-      if (response.data.statusCode === 200) {
-        alert("데이터 불러오기 성공");
-
-        this.allTasks = response.data.todoDto || [];
-        console.log("Updated todoList and allTasks:", this.todoList, this.allTasks);
-      } else {
-        alert("데이터 불러오기 실패");
-      }
-    })
-    .catch((error) => {
-      alert("데이터 불러오기 실패: " + error.message);
-    });
-    },
 
     goToCalendar() {
       this.$router.push("/calendar");
