@@ -165,13 +165,13 @@ export default {
         this.allTasks.routineDto = this.allTasks.routineDto.map((task) => {
           // 요일이 true인 경우 해당 요일 이름을 day 배열에 추가
           const day = [];
-          if (task.sun) day.push("일요일");
-          if (task.mon) day.push("월요일");
-          if (task.tue) day.push("화요일");
-          if (task.wed) day.push("수요일");
-          if (task.thr) day.push("목요일");
-          if (task.fri) day.push("금요일");
-          if (task.sat) day.push("토요일");
+          if (task.sun) day.push("일");
+          if (task.mon) day.push("월");
+          if (task.tue) day.push("화");
+          if (task.wed) day.push("수");
+          if (task.thr) day.push("목");
+          if (task.fri) day.push("금");
+          if (task.sat) day.push("토");
 
         // day 배열에 값이 있으면 isRoutine: true, 없으면 false
           return {

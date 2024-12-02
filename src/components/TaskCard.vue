@@ -54,7 +54,7 @@ export default {
   width: 100%;
 }
 .task-card.isRoutine {
-  background-color: yellow;
+  background-color: #C9F4E9;
 }
 .task-header {
   display: flex;
