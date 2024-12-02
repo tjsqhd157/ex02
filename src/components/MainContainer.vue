@@ -13,9 +13,10 @@
           <TaskColumn
             :tasks="this.allTasks"
             @markAsDone="markAsDone"
-            @deleteTask="deleteTask"
+            @deleteTodo="deleteTodo"
+            @deleteRoutine="deleteRoutine"
           />
-        </div>  
+        </div>   
       </div>
     </div>
   </div>
@@ -56,7 +57,7 @@ export default {
       return this.allTasks.routineDto.filter((task, index) => index % 2 === 0);
     },
     filteredRightTasks() {
-      return this.allTasks.routineDto.filter((task, index) => index % 2 !== 0);
+      return this.allTasks.filter((task, index) => index % 2 !== 0);
     },
      
     filteredTasks() {
@@ -182,25 +183,25 @@ export default {
 
 
   // Todo 삭제 메서드
-   async deleteTask(taskId) {
+   async deleteTodo(taskId) {
     try {
-        const response = await axios.delete(`/doitu/api/todo/delete/${taskId}`);
+        const response = await axios.delete(`/doitu/api/todoList/todo/delete/${taskId}`);
         if (response.status === 200) {
+            this.dataUP();
             console.log("삭제 성공");
         }
     } catch (error) {
         console.error("삭제 요청 중 오류 발생:", error.message);
     }
 },
-
-
   // Routine 삭제 메서드
   async deleteRoutine(routineId) {
     try {
       const response = await axios.delete(`/doitu/api/todoList/routine/delete/${routineId}`);
       if (response.data.statusCode === 200) {
         console.log("Routine 삭제 성공");
-        this.routineList = this.routineList.filter(routine => routine.id !== routineId); // UI에서 해당 routine 제거
+            this.dataUP();
+            console.log("삭제 성공");
       } else {
         console.error("Routine 삭제 실패: ", response.data);
       }
