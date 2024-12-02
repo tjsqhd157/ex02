@@ -1,7 +1,7 @@
 <template>
   <div class = "task-column">
       <TaskCard
-        v-for="(task, taskIndex) in filteredRoutineTasks"
+        v-for="(task, taskIndex) in filteredRoutineTasks" 
         :key="task.id"
         :task="task"
         :index="taskIndex"
@@ -36,7 +36,7 @@ export default {
     },
   },
   computed: {
-    filteredRoutineTasks() {
+    filteredRoutineTasks() { //열을 왼쪽 , 오른쪽으로 나눠서 저장하게 함  
       if (this.col === "left") {
         // col이 "left"인 경우 특정 조건의 데이터를 반환
         return this.tasks.routineDto.filter((task, index) => index % 2 === 0);
@@ -51,16 +51,16 @@ export default {
     if (this.col === "left") {
       // todoDto의 길이가 홀수일 때 반전
       if (isTodoLengthOdd) {
-        return this.tasks.todoDto.filter((task, index) => index % 2 !== 0); // 원래 routineDto의 로직
+        return this.tasks.todoDto.filter((task, index) => index % 2 !== 0); 
       } else {
-        return this.tasks.todoDto.filter((task, index) => index % 2 === 0); // 원래 todoDto의 로직
+        return this.tasks.todoDto.filter((task, index) => index % 2 === 0); 
       }
     } else {
       // this.col === "right"
       if (isTodoLengthOdd) {
-        return this.tasks.todoDto.filter((task, index) => index % 2 === 0); // 원래 routineDto의 로직
+        return this.tasks.todoDto.filter((task, index) => index % 2 === 0); 
       } else {
-        return this.tasks.todoDto.filter((task, index) => index % 2 !== 0); // 원래 todoDto의 로직
+        return this.tasks.todoDto.filter((task, index) => index % 2 !== 0); 
       }
     }
   },

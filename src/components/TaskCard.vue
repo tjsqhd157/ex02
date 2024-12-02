@@ -1,7 +1,7 @@
 <template>
   <div class="task-card" :class="{ done: task.done, isRoutine: task.isRoutine }">
     <div class="task-header">
-      <span class="task-tags" :style="{ backgroundColor: task.color }"> {{index +1}}
+      <span class="task-tags" :style="{ backgroundColor: task.color }">
       </span>
       <div class="task-actions">
         <button v-if="!task.isRoutine" class="task-done" @click="markAsDone" >
