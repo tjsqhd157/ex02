@@ -4,7 +4,7 @@
       <span class="task-tags" :style="{ backgroundColor: task.color }"> {{index +1}}
       </span>
       <div class="task-actions">
-        <button v-if="!task.isRoutine" class="task-done" @click="() => markAsDone()" >
+        <button v-if="!task.isRoutine" class="task-done" @click="markAsDone" >
           <img v-if="!task.done" src="@/assets/images/checked_black.png" alt="Done" class="done-icon" />
           <img v-if="task.done" src="@/assets/images/checked_green.png" alt="Task Done" class="done-icon"  />
         </button>

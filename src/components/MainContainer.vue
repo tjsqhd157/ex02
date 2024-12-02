@@ -2,6 +2,8 @@
   <div class="body">
     <div class="container">
       <Header
+        :workingCount="workingCount"
+        :doneCount="doneCount"
         @navigateToCalendar="goToCalendar"
         @filterStatus="filteredTasks"
       />
@@ -47,6 +49,7 @@ export default {
     return {
       allTasks: [],
       addTasks: [],
+      allTaskCount: [], 
       col: {
       type: String,
       required: true,
@@ -57,16 +60,22 @@ export default {
     };
   },
   computed: {
-           
+   workingCount() {
+      return this.allTaskCount.routineDto.length + this.allTaskCount.todoDto.filter((task) => !task.done).length;
+    },
+    doneCount() {
+      return this.allTaskCount.todoDto.filter((task) => task.done).length;
+    },        
   },
 
-  created() {
+  created() {// 처음 실행 될 때 실행됌 
     axios
       .get("/doitu/api/todoList/ALL")
       .then((response) => {
-        if (response.data.statusCode === 200) {
-          this.allTasks = response.data || [];
-          this.addIsRoutineToRoutineDto();
+        if (response.data.statusCode === 200) {     
+          this.allTasks = response.data || []; //투두리스트 루틴 리스트 가져옴 
+          this.allTaskCount = response.data || []; // working 갯수 (진행중인 계획 ) , done (끝난 계획 갯수 ) 
+          this.addIsRoutineToRoutineDto(); //요일 설정 되어 있으면 루틴으로 설정하는 것 
         } else {
           alert("데이터 불러오기 실패");
         }
@@ -77,10 +86,10 @@ export default {
   },
 
   methods: {
-    dataUP(){ 
+    dataUP(){ // 데이터 가져오는 메서드인데 , 수정된 데이터들을 바로 반영하기 위한 메서드 
     let API;
-      switch (this.filterStatus) {
-      case "done":
+      switch (this.filterStatus) { // working , done , all 상태에 따라 가져오는 다른 API로 설정 
+      case "done": 
       API = "/doitu/api/todoList/DONE";
       break;
   
@@ -97,10 +106,9 @@ export default {
         .get(API)
         .then((response) => {
           if (response.data.statusCode === 200) {
-
-            this.allTasks = response.data || [];
-            console.log("불러온 데이터 :", this.allTasks); 
-            this.addIsRoutineToRoutineDto();          
+            this.allTasks = response.data || []; 
+            this.addIsRoutineToRoutineDto();
+            this.TaskCount(); //데이터 업로드 할때 마다 working done 갯수세기 위해 존재 
           } else {
             alert("데이터 불러오기 실패");
           }
@@ -111,7 +119,7 @@ export default {
       },
 
 
-    async handleAddTask(newTask) {
+    async handleAddTask(newTask) { // sidebar에서 계획 추가하는 로직 
       const routineData = {
         sun: newTask.routine.includes("일"),
         mon: newTask.routine.includes("월"),
@@ -152,7 +160,7 @@ export default {
       }
     },
      
-    addIsRoutineToRoutineDto() {
+    addIsRoutineToRoutineDto() { // 요일 존재하면 루틴으로 설정 
       if (this.allTasks.routineDto && Array.isArray(this.allTasks.routineDto)) {
         this.allTasks.routineDto = this.allTasks.routineDto.map((task) => {
           // 요일이 true인 경우 해당 요일 이름을 day 배열에 추가
@@ -179,26 +187,24 @@ export default {
       }
     },
 
-
-
   // Todo 삭제 메서드
+
     async deleteTodo(taskId) {
       try {
           const response = await axios.delete(`/doitu/api/todoList/todo/delete/${taskId}`);
           if (response.status === 200) {
               this.dataUP();
-              console.log("삭제 성공");
           }
       } catch (error) {
           console.error("삭제 요청 중 오류 발생:", error.message);
       }
     },
+
   // Routine 삭제 메서드
     async deleteRoutine(routineId) {
       try {
         const response = await axios.delete(`/doitu/api/todoList/routine/delete/${routineId}`);
         if (response.data.statusCode === 200) {
-          console.log("Routine 삭제 성공");
               this.dataUP();
               console.log("삭제 성공");
         } else {
@@ -215,12 +221,9 @@ export default {
       if (taskIndex !== -1) {
         this.allTasks.todoDto[taskIndex].done = !this.allTasks.todoDto[taskIndex].done;
       }
-      else
-    // 서버와 동기화
       try {
       const response = await axios.post(`/doitu/api/todoList/done/${taskId}`);
       if (response.data.statusCode === 200) {
-        alert("작업 완료 상태로 변경 성공!");
         this.dataUP();
       } else {
         alert("상태 변경 실패: " + response.data.msg);
@@ -230,17 +233,17 @@ export default {
       }
     },
   
-    filteredTasks(filterInput) {
+    filteredTasks(filterInput) { //현재 working done all 버튼 누를때 현재 상태 변함
       switch (filterInput) {
-        case "done":
+        case "done":                //done이면 끝난 계획만 보여주게 함 
           this.filterStatus = "done";
           this.dataUP();
         break;
-        case "working":
+        case "working":             // 진행 중인 계획 만 보여줌 
           this.filterStatus = "working";
           this.dataUP();
         break;
-        case "all":
+        case "all":                 // 계획 모두 보여줌 
         default:
           this.filterStatus = "all";
           this.dataUP();
@@ -248,15 +251,26 @@ export default {
       }
     },
 
+    TaskCount() {                       //working done 계획 각각 몇개인지 세는 메서드 
+      axios
+        .get('/doitu/api/todoList/ALL')
+        .then((response) => {
+          if (response.data.statusCode === 200) {
+            this.allTaskCount = response.data || [];    
+          } else {
+            alert("데이터 불러오기 실패");
+          }
+        })
+        .catch((error) => {
+          alert("데이터 불러오기 실패: " + error.message);
+        });  
+      },
 },
-
-
   goToCalendar() {
       this.$router.push("/calendar");
   },
 
   mounted() {
-   
   },
 
 
