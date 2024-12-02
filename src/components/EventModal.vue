@@ -21,6 +21,7 @@
             {{ emoji }}
           </span>
         </div>
+        <button class="emoji-save-button" @click="saveEmoji">이모지 저장</button>
       </div>
 
       <!-- 간단한 일기 작성 -->
@@ -29,26 +30,40 @@
         v-model="diaryText"
         placeholder="간단한 하루 일기를 작성해보세요..."
       ></textarea>
+      <button class="diary-save-button" @click="saveDiary">일기 저장</button>
 
-      <!-- 할 일 목록 -->
-      <div class="events">
-        <p>오늘의 할 일</p>
+      <!-- 루틴 목록 -->
+      <div class="routines" v-if="dayData?.routineDto?.length">
+        <p>오늘의 루틴</p>
         <div
-          v-for="(event, index) in dayData?.events"
+          v-for="(routine, index) in dayData?.routineDto"
           :key="index"
-          class="event"
+          class="routine"
+          :style="{ backgroundColor: routine.color }"
         >
-          {{ event }}
+          {{ routine.title }}
         </div>
       </div>
 
-      <!-- 저장 버튼 -->
-      <button class="save-button" @click="saveData">저장</button>
+      <!-- 할 일 목록 -->
+      <div class="events" v-if="dayData?.todoDto?.length">
+        <p>오늘의 할 일</p>
+        <div
+          v-for="(todo, index) in dayData?.todoDto"
+          :key="index"
+          class="event"
+          :class="{ done: todo.done }"
+        >
+          {{ todo.title }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   props: {
     isVisible: {
@@ -71,6 +86,17 @@ export default {
       diaryText: "",
     };
   },
+  watch: {
+    dayData: {
+      immediate: true,
+      handler(newData) {
+        if (newData) {
+          this.selectedEmoji = newData.emoji || null;
+          this.diaryText = newData.diary || "";
+        }
+      },
+    },
+  },
   methods: {
     closeModal() {
       this.$emit("close", { emoji: this.selectedEmoji, diary: this.diaryText });
@@ -78,19 +104,37 @@ export default {
     selectEmoji(emoji) {
       this.selectedEmoji = emoji;
     },
-    saveData() {
-      // 저장 로직 (이벤트 발생)
-      console.log("저장 완료: ", {
-        date: this.formattedDate,
-        emoji: this.selectedEmoji,
-        diary: this.diaryText,
-      });
-      alert("저장되었습니다!");
-      this.$emit("save", {
-        date: this.formattedDate,
-        emoji: this.selectedEmoji,
-        diary: this.diaryText,
-      });
+    async saveEmoji() {
+      try {
+        if (this.selectedEmoji) {
+          await axios.post("/doitu/api/calender/emoji", {
+            date: this.formattedDate,
+            emoji: this.selectedEmoji,
+          });
+          alert("이모지가 저장되었습니다!");
+          this.$emit("updateEmoji", {
+            date: this.formattedDate,
+            emoji: this.selectedEmoji,
+          });
+        }
+      } catch (error) {
+        console.error("이모지 저장 중 오류 발생:", error);
+        alert("이모지 저장에 실패했습니다.");
+      }
+    },
+    async saveDiary() {
+      try {
+        if (this.diaryText.trim() !== "") {
+          await axios.post("/doitu/api/calender/diary", {
+            date: this.formattedDate,
+            diary: this.diaryText,
+          });
+          alert("일기가 저장되었습니다!");
+        }
+      } catch (error) {
+        console.error("일기 저장 중 오류 발생:", error);
+        alert("일기 저장에 실패했습니다.");
+      }
     },
   },
 };
@@ -170,6 +214,19 @@ export default {
   resize: none;
 }
 
+/* 루틴 목록 */
+.routines {
+  margin-top: 20px;
+}
+
+.routine {
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  color: white;
+  text-align: center;
+}
+
 /* 할 일 목록 */
 .events {
   margin-top: 20px;
@@ -182,9 +239,15 @@ export default {
   margin-bottom: 5px;
 }
 
+.event.done {
+  text-decoration: line-through;
+  background: #c8e6c9;
+}
+
 /* 저장 버튼 스타일 */
-.save-button {
-  margin-top: 20px;
+.emoji-save-button,
+.diary-save-button {
+  margin-top: 10px;
   background-color: #66bb6a;
   color: white;
   border: none;
@@ -196,7 +259,8 @@ export default {
   transition: background-color 0.3s ease;
 }
 
-.save-button:hover {
+.emoji-save-button:hover,
+.diary-save-button:hover {
   background-color: #43a047;
 }
 </style>

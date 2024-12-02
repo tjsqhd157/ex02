@@ -21,6 +21,16 @@
               {{ event }}
             </span>
           </div>
+          <!-- 요일 루틴 -->
+          <div class="routine" v-if="getDayData(day.date)?.routine">
+            <span
+              v-for="(routine, index) in getDayData(day.date).routine"
+              :key="index"
+              :style="{ color: routine.color }"
+            >
+              {{ routine.title }}
+            </span>
+          </div>
         </div>
       </template>
     </vc-calendar>
@@ -47,40 +57,62 @@ export default {
   },
   data() {
     return {
-    currentDate: new Date(),
-    isModalOpen: false,
-    selectedDayData: null,
-    selectedDate: "",
-    dayData: [
-      // 날짜별 더미 데이터
-      { date: "2024-11-10", emoji: "😀", events: ["Meeting", "Shopping"] },
-      { date: "2024-11-11", emoji: "😡", events: ["Coding Session"] },
-      { date: "2024-11-12", emoji: "😢", events: ["Project Review"] },
-      { date: "2024-11-13", emoji: "😆", events: ["Team Lunch"] },
-      { date: "2024-11-14", emoji: "😍", events: ["Yoga Class", "Dinner"] },
-    ],
-  };
+      currentDate: new Date(),
+      isModalOpen: false,
+      selectedDayData: null,
+      selectedDate: "",
+      dayData: [], // API로 초기화
+    };
   },
   methods: {
     async fetchCalendarData() {
       try {
-        const formattedMonth = this.currentDate.toISOString().split("T")[0].slice(0, 7); // "YYYY-MM" 형식
-        const response = await axios.get("/api/calendar", {
-          params: { month: formattedMonth },
-        });
-        this.dayData = response.data.days; // API 응답 데이터 매핑
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth() + 1; // 월은 0부터 시작하므로 +1
+        const response = await axios.get(`/doitu/api/calender/${year}/${month}`);
+
+        if (response.data.statusCode === 200) {
+          this.dayData = response.data.calenderDto.map((entry) => ({
+            date: entry.date,
+            emoji: entry.emoji,
+            events: [
+              ...entry.todoDto.map((todo) => `${todo.title} (${todo.done ? "완료" : "미완료"})`)
+            ],
+            routine: this.processRoutine(entry.routineDto, entry.date),
+          }));
+        } else {
+          console.error("캘린더 데이터를 불러오는 데 실패했습니다:", response.data.msg);
+          alert("캘린더 데이터를 불러오는 데 실패했습니다.");
+        }
       } catch (error) {
         console.error("Error fetching calendar data:", error);
-        alert("캘린더 데이터를 불러오는 데 실패했습니다.");
+        alert("캘린더 데이터를 불러오는 중 오류가 발생했습니다.");
       }
     },
+    processRoutine(routineDto, date) {
+      // 요일에 따라 활성화된 루틴만 반환
+      const weekDay = new Date(date).getDay(); // 0: 일요일, 1: 월요일 ...
+      const weekKeys = ["sun", "mon", "tue", "wed", "thr", "fri", "sat"];
+
+      return routineDto
+        .filter((routine) => routine[weekKeys[weekDay]]) // 해당 요일이 true인 루틴만
+        .map((routine) => ({
+          title: routine.title,
+          color: routine.color,
+        }));
+    },
     getDayData(date) {
-      const formattedDate = date.toISOString().split("T")[0];
+      const formattedDate = this.formatDateToISO(date); // ISO 형식 변환
       return this.dayData.find((d) => d.date === formattedDate);
     },
+    formatDateToISO(date) {
+      // 날짜 형식을 ISO 8601 형식 (YYYY-MM-DD)으로 변환
+      const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return offsetDate.toISOString().split("T")[0]; // 로컬 시간대로 변환
+    },
     onDayClick(day) {
-      const formattedDate = day.date.toLocaleDateString("en-CA"); // "YYYY-MM-DD" 형식
-      this.selectedDayData = this.getDayData(day.date) || { events: [] };
+      const formattedDate = this.formatDateToISO(day.date); // 날짜 형식을 ISO로 변환
+      this.selectedDayData = this.getDayData(day.date) || { events: [], routine: [] };
       this.selectedDate = formattedDate; // 선택된 날짜 설정
       this.isModalOpen = true; // 모달 열기
     },
@@ -94,8 +126,8 @@ export default {
   },
   watch: {
     currentDate(newDate, oldDate) {
-      if (newDate.getMonth() !== oldDate.getMonth()) {
-        this.fetchCalendarData(); // 달이 바뀔 때마다 데이터 갱신
+      if (newDate.getMonth() !== oldDate.getMonth() || newDate.getFullYear() !== oldDate.getFullYear()) {
+        this.fetchCalendarData(); // 연도와 월이 바뀔 때마다 데이터 갱신
       }
     },
   },
@@ -103,18 +135,16 @@ export default {
 </script>
 
 <style scoped>
-/* 캘린더 전체 스타일 */
+/* 기존 스타일 유지 */
 .calendar-wrapper {
   max-width: 1000px;
   height: 500px;
-  
   margin: 50px auto;
 }
 
-/* 날짜 셀 스타일 */
 .custom-day-cell {
-  width: 120px; /* 셀 너비 */
-  height: 80px; /* 셀 높이 */
+  width: 120px;
+  height: 80px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -124,7 +154,7 @@ export default {
   border: 1px solid #e0e0e0;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
-  position: relative; /* 날짜와 이모지 위치 조정을 위한 기준 */
+  position: relative;
 }
 
 .custom-day-cell:hover {
@@ -132,44 +162,39 @@ export default {
   transform: scale(1.05);
 }
 
-/* 날짜 텍스트 스타일 */
 .day-text {
-  position: absolute; /* 날짜를 셀 안의 특정 위치로 고정 */
-  top: 5px; /* 셀 위쪽에서 5px 아래로 배치 */
-  right: 5px; /* 셀 오른쪽에서 5px 안쪽으로 배치 */
-  font-size: 0.9rem; /* 텍스트 크기 */
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 0.9rem;
   font-weight: bold;
   color: #333333;
 }
 
-/* 이모지 스타일 */
 .emoji {
-  position: absolute; /* 이모지를 셀 안의 특정 위치로 고정 */
-  top: 5px; /* 셀 위쪽에서 5px 아래로 배치 */
-  left: 5px; /* 셀 왼쪽에서 5px 안쪽으로 배치 */
-  font-size: 0.8rem; /* 이모지 크기 */
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  font-size: 0.8rem;
 }
 
-/* 이벤트 텍스트 박스 스타일 */
-.events {
-  font-size: 0.5rem; /* 텍스트 크기 */
-  color: #666666; /* 텍스트 색상 */
-  text-align: center; /* 텍스트 정렬 */
-  margin-top: 5px; /* 위쪽 간격 */
-  padding: 5px; /* 내부 여백 */
-  width: 90%; /* 셀 크기와 비슷하게 너비 설정 */
-  border: 1px solid #e0e0e0; /* 테두리 */
-  border-radius: 5px; /* 둥근 모서리 */
-  background-color: #f9f9f9; /* 배경색 */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 약간의 그림자 */
-  margin-left: auto; /* 왼쪽 정렬 */
-  margin-right: auto; /* 오른쪽 정렬 */
-  display: block; /* 각 이벤트를 블록으로 표시 */
+.events, .routine {
+  font-size: 0.5rem;
+  color: #666666;
+  text-align: center;
+  margin-top: 5px;
+  padding: 5px;
+  width: 90%;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.events span {
-  display: block; /* 이벤트를 각각의 줄에 표시 */
-  margin-bottom: 2px; /* 아래쪽 간격 추가 */
+.events span, .routine span {
+  display: block;
+  margin-bottom: 2px;
 }
-
 </style>

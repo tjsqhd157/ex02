@@ -49,10 +49,12 @@ export default {
       this.$router.push("/SignUp"); // '/signup' 경로로 이동
     },
     signIn() {
+      console.log("😀");
       axios
         .post("/signin", {
           userId: this.userId,
           password: this.password,
+          
         })
         .then((response) => {
           if (response.data.statusCode === 200) {

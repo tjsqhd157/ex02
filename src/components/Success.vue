@@ -14,7 +14,7 @@
       </div>
 
       <div class="component" @click="goToMain">
-        <div class="text">Use it now</div>
+        <div class="text">SignIn</div>
       </div>
     </div>
   </div>
@@ -24,9 +24,10 @@
 export default {
   name: "MyScreen",
   methods:{
-    goToMain(){this.$router.push("/maincontainer");}
+    goToMain(){this.$router.push("/sigin");}
   },
   components: {},
+  
 };
 </script>
 
