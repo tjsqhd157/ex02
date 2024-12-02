@@ -6,17 +6,15 @@
         :task="task"
         :index="taskIndex"
         @markAsDone="markAsDone"
-        @deleteTask="deleteTask"
-      />   
-  </div>
-  <div class = "task-column">
+        @deleteTask="deleteRoutine"
+      />
       <TaskCard
         v-for="(task, taskIndex) in tasks.todoDto"
         :key= "task.id"
         :task="task"
         :index="taskIndex"
         @markAsDone="markAsDone"
-        @deleteTask="deleteTask"
+        @deleteTask="deleteTodo"
       />   
   </div>
 </template>
@@ -32,13 +30,17 @@ export default {
     tasks: {
       type: Object
     },
+
   },
   methods: {
     markAsDone(taskId) {
     this.$emit("markAsDone", taskId); // 부모 컴포넌트로 이벤트 전달
   },
-    deleteTask(taskId) {
-      this.$emit('deleteTask', taskId);
+    deletetodo(taskId) {
+      this.$emit('deleteTodo', taskId);
+    },
+    deleteRoutine(taskId) {
+      this.$emit('deleteRoutine', taskId);
     },
   },
 };
