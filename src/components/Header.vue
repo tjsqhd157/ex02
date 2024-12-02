@@ -9,15 +9,15 @@
       <button class="calendar-btn" @click="goToCalendar">Calendar</button>
       <div class="status-bar">
         <!-- All Status -->
-        <button class="status all" @click="filterall">All</button>
+        <button class="status all" @click="filterAll">All</button>
 
         <!-- Working Status -->
-        <button class="status working" @click="filterworking">🔥 Working..!
+        <button class="status working" @click="filterWorking">🔥 Working..!
           <span class="status-count">{{ workingCount }}</span>
         </button>
 
         <!-- Done Status -->
-        <button class="status done " @click="filterDone" >🌈Done...!
+        <button class="status done" @click="filterDone">🌈 Done...!
           <span class="status-count">{{ doneCount }}</span>
         </button>
       </div>
@@ -26,24 +26,55 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
-  name: 'AppHeader',
-  props: {
-    workingCount: Number,
-    doneCount: Number,
+  name: "AppHeader",
+  data() {
+    return {
+      allTasks: {
+        routineDto: [],
+        todoDto: [],
+      },
+    };
+  },
+  computed: {
+    workingCount() {
+      return (
+        this.allTasks.routineDto.length +
+        this.allTasks.todoDto.filter((task) => !task.done).length
+      );
+    },
+    doneCount() {
+      return this.allTasks.todoDto.filter((task) => task.done).length;
+    },
+  },
+  created() {
+    axios
+      .get("/doitu/api/todoList/ALL")
+      .then((response) => {
+        if (response.data.statusCode === 200) {
+          this.allTasks = response.data || { routineDto: [], todoDto: [] };
+        } else {
+          alert("데이터 불러오기 실패");
+        }
+      })
+      .catch((error) => {
+        alert("데이터 불러오기 실패: " + error.message);
+      });
   },
   methods: {
     goToCalendar() {
       this.$router.push("/calendar");
     },
     filterDone() {
-    this.$emit('filterStatus', 'done');
+      this.$emit("filterStatus", "done");
     },
-    filterworking() {
-    this.$emit('filterStatus', 'working');
+    filterWorking() {
+      this.$emit("filterStatus", "working");
     },
-    filterall() {
-    this.$emit('filterStatus', 'wall');
+    filterAll() {
+      this.$emit("filterStatus", "all");
     },
   },
 };
@@ -66,8 +97,8 @@ export default {
   color: #25cd94;
   font-weight: bold;
 }
-.calendar-btn{
-  background-color: #C9F4E9;
+.calendar-btn {
+  background-color: #c9f4e9;
   border: none;
   border-radius: 50px;
   padding: 10px 20px;
@@ -95,7 +126,7 @@ export default {
   margin-right: 10px;
   font-size: 14px;
   cursor: pointer;
-  color:  #26c281;
+  color: #26c281;
   border: none;
 }
 .status-count {

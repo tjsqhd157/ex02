@@ -2,8 +2,6 @@
   <div class="body">
     <div class="container">
       <Header
-        :workingCount="workingCount"
-        :doneCount="doneCount"
         @navigateToCalendar="goToCalendar"
         @filterStatus="filteredTasks"
       />
@@ -12,11 +10,21 @@
         <div class="task-columns" >
           <TaskColumn
             :tasks="this.allTasks"
+            :col="'left'"
             @markAsDone="markAsDone"
             @deleteTodo="deleteTodo"
             @deleteRoutine="deleteRoutine"
           />
-        </div>   
+        </div>
+        <div class="task-columns" >
+          <TaskColumn
+            :tasks="this.allTasks"
+            :col="'right'"
+            @markAsDone="markAsDone"
+            @deleteTodo="deleteTodo"
+            @deleteRoutine="deleteRoutine"
+          />
+        </div>     
       </div>
     </div>
   </div>
@@ -39,46 +47,24 @@ export default {
     return {
       allTasks: [],
       addTasks: [],
-      rotineList : [],
-      todoList : [],
+      col: {
+      type: String,
+      required: true,
+      },
       tagColors: ["#80D8FF", "#FFD740", "#FFAB91", "#CE93D8", "#A5D6A7"],
       days: ["일", "월", "화", "수", "목", "금", "토"],
       filterStatus: "all",
     };
   },
   computed: {
-    workingCount() {
-      return this.allTasks.todoDto.filter((task) => task.done).length + this.allTasks.todoDto.filter((task) => task.done).length;
-    },
-    doneCount() {
-      return this.allTasks.todoDto.filter((task) => task.done).length;
-    },
-    filteredLeftTasks() {
-      return this.allTasks.routineDto.filter((task, index) => index % 2 === 0);
-    },
-    filteredRightTasks() {
-      return this.allTasks.filter((task, index) => index % 2 !== 0);
-    },
-     
-    filteredTasks() {
-    if (this.filterStatus === "done") {
-      return this.allTasks.todoDto.filter(task => task.done); // done=true
-    } else if (this.filterStatus === "working") {
-      return this.allTasks.todoDto.filter(task => !task.done); // done=false
-    }
-    return this.allTasks.todoDto; // 전체 보기
+           
   },
-
-    },
 
   created() {
     axios
       .get("/doitu/api/todoList/ALL")
       .then((response) => {
         if (response.data.statusCode === 200) {
-          alert("데이터 불러오기 성공");
-          this.rotineList = response.data.routineDto || []; // 데이터를 ALL_List에 저장
-          this.todoList = response.data.todoDto || [] ;
           this.allTasks = response.data || [];
           this.addIsRoutineToRoutineDto();
         } else {
@@ -91,26 +77,39 @@ export default {
   },
 
   methods: {
+    dataUP(){ 
+    let API;
+      switch (this.filterStatus) {
+      case "done":
+      API = "/doitu/api/todoList/DONE";
+      break;
+  
+      case "working":
+      API = "/doitu/api/todoList/WORKING";
+      break; 
 
-    dataUP(){
-    axios
-      .get("/doitu/api/todoList/ALL")
-      .then((response) => {
-        if (response.data.statusCode === 200) {
-          alert("데이터 불러오기 성공");
-          this.rotineList = response.data.routineDto || []; // 데이터를 ALL_List에 저장
-          this.todoList = response.data.todoDto || [] ;
-          this.allTasks = response.data || [];
-          console.log("mergedTasks:", this.allTasks); 
-          this.addIsRoutineToRoutineDto();
-        } else {
-          alert("데이터 불러오기 실패");
-        }
-      })
-      .catch((error) => {
-        alert("데이터 불러오기 실패: " + error.message);
-      });  
-    },
+      default:
+      API = "/doitu/api/todoList/ALL";
+      break;
+      }
+
+      axios
+        .get(API)
+        .then((response) => {
+          if (response.data.statusCode === 200) {
+
+            this.allTasks = response.data || [];
+            console.log("불러온 데이터 :", this.allTasks); 
+            this.addIsRoutineToRoutineDto();          
+          } else {
+            alert("데이터 불러오기 실패");
+          }
+        })
+        .catch((error) => {
+          alert("데이터 불러오기 실패: " + error.message);
+        });  
+      },
+
 
     async handleAddTask(newTask) {
       const routineData = {
@@ -153,100 +152,114 @@ export default {
       }
     },
      
-  addIsRoutineToRoutineDto() {
-    if (this.allTasks.routineDto && Array.isArray(this.allTasks.routineDto)) {
-      this.allTasks.routineDto = this.allTasks.routineDto.map((task) => {
-        // 요일이 true인 경우 해당 요일 이름을 day 배열에 추가
-        const day = [];
-        if (task.sun) day.push("일요일");
-        if (task.mon) day.push("월요일");
-        if (task.tue) day.push("화요일");
-        if (task.wed) day.push("수요일");
-        if (task.thr) day.push("목요일");
-        if (task.fri) day.push("금요일");
-        if (task.sat) day.push("토요일");
+    addIsRoutineToRoutineDto() {
+      if (this.allTasks.routineDto && Array.isArray(this.allTasks.routineDto)) {
+        this.allTasks.routineDto = this.allTasks.routineDto.map((task) => {
+          // 요일이 true인 경우 해당 요일 이름을 day 배열에 추가
+          const day = [];
+          if (task.sun) day.push("일요일");
+          if (task.mon) day.push("월요일");
+          if (task.tue) day.push("화요일");
+          if (task.wed) day.push("수요일");
+          if (task.thr) day.push("목요일");
+          if (task.fri) day.push("금요일");
+          if (task.sat) day.push("토요일");
 
         // day 배열에 값이 있으면 isRoutine: true, 없으면 false
-        return {
-          ...task,
-          day, // 요일 배열 추가
-          isRoutine: day.length > 0,
-        };
-      });
+          return {
+            ...task,
+            day, // 요일 배열 추가
+            isRoutine: day.length > 0,
+          };
+        });
 
-      console.log("Updated routineDto with day and isRoutine:", this.allTasks.routineDto);
-    } else {
-      console.error("routineDto is not an array or is undefined");
-    }
-  },
+        console.log("Updated routineDto with day and isRoutine:", this.allTasks.routineDto);
+      } else {
+        console.error("routineDto is not an array or is undefined");
+      }
+    },
 
 
 
   // Todo 삭제 메서드
-   async deleteTodo(taskId) {
-    try {
-        const response = await axios.delete(`/doitu/api/todoList/todo/delete/${taskId}`);
-        if (response.status === 200) {
-            this.dataUP();
-            console.log("삭제 성공");
-        }
-    } catch (error) {
-        console.error("삭제 요청 중 오류 발생:", error.message);
-    }
-},
-  // Routine 삭제 메서드
-  async deleteRoutine(routineId) {
-    try {
-      const response = await axios.delete(`/doitu/api/todoList/routine/delete/${routineId}`);
-      if (response.data.statusCode === 200) {
-        console.log("Routine 삭제 성공");
-            this.dataUP();
-            console.log("삭제 성공");
-      } else {
-        console.error("Routine 삭제 실패: ", response.data);
+    async deleteTodo(taskId) {
+      try {
+          const response = await axios.delete(`/doitu/api/todoList/todo/delete/${taskId}`);
+          if (response.status === 200) {
+              this.dataUP();
+              console.log("삭제 성공");
+          }
+      } catch (error) {
+          console.error("삭제 요청 중 오류 발생:", error.message);
       }
-    } catch (error) {
-      console.error("삭제 요청 중 오류 발생: ", error.message);
-    }
-  },
+    },
+  // Routine 삭제 메서드
+    async deleteRoutine(routineId) {
+      try {
+        const response = await axios.delete(`/doitu/api/todoList/routine/delete/${routineId}`);
+        if (response.data.statusCode === 200) {
+          console.log("Routine 삭제 성공");
+              this.dataUP();
+              console.log("삭제 성공");
+        } else {
+          console.error("Routine 삭제 실패: ", response.data);
+        }
+      } catch (error) {
+        console.error("삭제 요청 중 오류 발생: ", error.message);
+      }
+    },
 
     async markAsDone(taskId) {
     // 로컬 상태 업데이트
-    const taskIndex = this.allTasks.todoDto.findIndex(task => task.id === taskId);
-    if (taskIndex !== -1) {
-      this.allTasks.todoDto[taskIndex].done = !this.allTasks.todoDto[taskIndex].done;
-    }
-
+      const taskIndex = this.allTasks.todoDto.findIndex(task => task.id === taskId);
+      if (taskIndex !== -1) {
+        this.allTasks.todoDto[taskIndex].done = !this.allTasks.todoDto[taskIndex].done;
+      }
+      else
     // 서버와 동기화
-    try {
-    const response = await axios.post(`/doitu/api/todoList/done/${taskId}`);
-    if (response.data.statusCode === 200) {
-      alert("작업 완료 상태로 변경 성공!");
-    } else {
-      alert("상태 변경 실패: " + response.data.msg);
-    }
-  } catch (error) {
-    console.error("API 호출 중 오류 발생:", error.message);
-  }
-  },
- 
+      try {
+      const response = await axios.post(`/doitu/api/todoList/done/${taskId}`);
+      if (response.data.statusCode === 200) {
+        alert("작업 완료 상태로 변경 성공!");
+        this.dataUP();
+      } else {
+        alert("상태 변경 실패: " + response.data.msg);
+      }
+      } catch (error) {
+        console.error("API 호출 중 오류 발생:", error.message);
+      }
+    },
+  
+    filteredTasks(filterInput) {
+      switch (filterInput) {
+        case "done":
+          this.filterStatus = "done";
+          this.dataUP();
+        break;
+        case "working":
+          this.filterStatus = "working";
+          this.dataUP();
+        break;
+        case "all":
+        default:
+          this.filterStatus = "all";
+          this.dataUP();
+        break;
+      }
+    },
 
 },
-   showDoneTasks() {
-    this.filterStatus = "done";
-  },
-  showAllTasks() {
-    this.filterStatus = "all";
-  },
-  
 
-    goToCalendar() {
+
+  goToCalendar() {
       this.$router.push("/calendar");
-    },
+  },
 
   mounted() {
    
   },
+
+
 };
 </script>
 
